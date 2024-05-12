@@ -15,12 +15,40 @@ typedef struct{
 //Array that saves the three words with the least edit distance
 output_element *output=NULL;
 
-//Calculate the edit distance of two strings with the Wagner-Fischer-Algorithm
+uint8_t minThree(uint8_t a, uint8_t b, uint8_t c){
+	uint8_t min = a;
+	if(a>b) min = b;
+	if(a>c) min = c;
+	return min;
+}
+
+//Calculate the edit distance between two strings with the Wagner-Fischer-Algorithm
 uint8_t distance(char *string_a, uint8_t string_a_length, char *string_b, uint8_t string_b_length){
+	//Special cases if one string is empty
+	if(string_a_length==0) return string_b_length;
+	if(string_b_length==0) return string_a_length;
+
 	//Create a Matrix for the calculation
 	uint8_t matrix[string_a_length+1][string_b_length+1];
-
-	return 0;
+	
+	//Set all Values to zero
+	for(uint8_t a=0; a<=string_a_length; a++) for(uint8_t b=0; b<=string_b_length; b++) matrix[a][b] = 0;	
+	
+	//Fill the first row and column (identical for every string combination)
+	for(uint8_t i=0; i<=string_a_length; i++) matrix[i][0]=i;
+	for(uint8_t i=0; i<=string_b_length; i++) matrix[0][i]=i;
+	
+	for(uint8_t a=1; a<=string_a_length; a++){
+		for(uint8_t b=1; b<=string_b_length; b++){
+			//If one letter of both strings is equal the edit distance doesnt increment
+			if(string_a[a-1]==string_b[b-1]) matrix[a][b]=matrix[a-1][b-1];
+			else{
+				matrix[a][b]=minThree(matrix[a-1][b-1], matrix[a-1][b], matrix[a][b-1])+1;
+			}
+		}
+	}
+	
+	return matrix[string_a_length][string_b_length];
 }
 
 int main(int argc, const char *argv[]){
@@ -59,7 +87,7 @@ int main(int argc, const char *argv[]){
 			word_length--;
 		}
 		//Calculate and save the edit distance
-		edit_distance = distance(user_input,input_length-1,word,word_length-1);
+		edit_distance = distance(user_input,input_length,word,word_length);
 		printf("%s = %d\n",word,edit_distance);
 		//Iterate trough the output elements and check if the new word have a better edit distance
 	}
