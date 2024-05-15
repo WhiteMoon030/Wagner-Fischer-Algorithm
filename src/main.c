@@ -13,7 +13,7 @@ typedef struct{
 } output_element;
 
 //Array that saves the three words with the least edit distance
-output_element *output=NULL;
+output_element output[5]={0};
 
 uint8_t minThree(uint8_t a, uint8_t b, uint8_t c){
 	uint8_t min = a;
@@ -88,9 +88,27 @@ int main(int argc, const char *argv[]){
 		}
 		//Calculate and save the edit distance
 		edit_distance = distance(user_input,input_length,word,word_length);
-		printf("%s = %d\n",word,edit_distance);
 		//Iterate trough the output elements and check if the new word have a better edit distance
+		for(uint8_t i=0; i<5; i++){
+			//If an output element is null => insert the current word
+			if(output[i].word==NULL){
+				output[i].word = (char *)malloc(sizeof(char)*word_length);
+				strcpy(output[i].word, word);
+				output[i].edit_distance = edit_distance;
+				break;
+			}
+			//If an output element has a bigger edit distance then the current word => insert the new one
+			if(output[i].edit_distance > edit_distance){
+				free(output[i].word);
+				output[i].word = (char *)malloc(sizeof(char)*word_length);
+				strcpy(output[i].word, word);
+				output[i].edit_distance = edit_distance;
+				break;
+			}
+		}
+
 	}
+	for(uint8_t i=0; i<5; i++) printf("%s = %d\n",output[i].word,output[i].edit_distance);
 	fclose(wordlist);
 	//Free the memory
 	free(user_input);
